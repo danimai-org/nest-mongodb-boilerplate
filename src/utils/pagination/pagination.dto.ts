@@ -88,8 +88,12 @@ export class PaginationResponse<T> {
     this.rows = data;
     this.page = page;
     this.limit = limit;
+    this.count = total;
     if (total > page * limit) {
       this.hasNextPage = true;
+    }
+    if (page > 1) {
+      this.hasPreviousPage = true;
     }
   }
 }

@@ -1,33 +1,35 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Token, TokenType, User } from '../entities';
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import Token, { IToken, TokenType } from '../models/token.model';
+import User, { IUser } from '../models/user.model';
 
 @Injectable()
 export class TokenService {
   constructor(
-    @InjectRepository(Token)
-    private readonly tokenRepository: Repository<Token>,
+    @InjectModel(Token.name)
+    private tokenModel: Model<IToken>,
+    @InjectModel(User.name)
+    private userModel: Model<IUser>,
   ) {}
 
   async create(
-    user: User,
+    user: IUser,
     type: keyof typeof TokenType = 'REGISTER_VERIFY',
     expires_at: Date = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
   ) {
-    const token = Token.create({
+    return this.tokenModel.create({
       user_id: user.id,
       type: TokenType[type],
       expires_at,
     });
-    return this.tokenRepository.save(token);
   }
 
   async verify(token: string, type: keyof typeof TokenType) {
-    const tokenEntity = await this.tokenRepository.findOne({
-      relations: ['user'],
-      loadEagerRelations: true,
-      where: { token, type: TokenType[type], is_used: false },
+    const tokenEntity = await this.tokenModel.findOne({
+      token,
+      type: TokenType[type],
+      is_used: false,
     });
     if (!tokenEntity) {
       throw new Error('Token not found');
@@ -37,6 +39,6 @@ export class TokenService {
     }
     tokenEntity.is_used = true;
     await tokenEntity.save();
-    return tokenEntity.user;
+    return this.userModel.findById(tokenEntity.user);
   }
 }

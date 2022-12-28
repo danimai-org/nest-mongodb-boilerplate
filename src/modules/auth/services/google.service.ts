@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { google, Auth } from 'googleapis';
 import { UserService } from '../../user/services';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { SessionThrough, User } from '../../user/entities';
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import User, { IUser } from '../../user/models/user.model';
+import { SessionThrough } from '../../user/models/session.model';
 
 @Injectable()
 export class GoogleAuthenticationService {
@@ -12,8 +13,6 @@ export class GoogleAuthenticationService {
 
   constructor(
     private readonly userService: UserService,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService,
   ) {
     const clientID = this.configService.get('google_auth.client_id');
@@ -27,7 +26,7 @@ export class GoogleAuthenticationService {
     const email = tokenInfo.email;
 
     try {
-      const user = await this.userRepository.findOneBy({ email });
+      const user = await this.userService.findOne({ email });
       return this.handleRegisteredUser(user);
     } catch (error) {
       if (error.status !== 404) {
@@ -61,7 +60,7 @@ export class GoogleAuthenticationService {
     return userInfoResponse.data;
   }
 
-  async handleRegisteredUser(user: User) {
+  async handleRegisteredUser(user: IUser) {
     const jwtToken = await this.userService.login(user, SessionThrough.GOOGLE);
     return { auth_token: jwtToken };
   }
@@ -79,12 +78,10 @@ export class GoogleAuthenticationService {
       first_name = name.split(' ')[0];
       last_name = name.split(' ').slice(1).join(' ');
     }
-    const newUser = this.userRepository.create({
+    return this.userService.create({
       email,
       first_name,
       last_name,
     });
-    await this.userRepository.save(newUser);
-    return newUser;
   }
 }

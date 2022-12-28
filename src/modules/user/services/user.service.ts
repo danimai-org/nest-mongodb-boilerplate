@@ -1,27 +1,28 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { instanceToPlain } from 'class-transformer';
-import { FindOneOptions, Repository } from 'typeorm';
 import { UpdateUserRequestDto, UserCreateDto } from '../dto/user.request.dto';
-import { SessionThrough, User } from '../entities';
 import { JwtService } from '@nestjs/jwt';
-import { UserSessionService } from './session.service';
+import { SessionService } from './session.service';
 import { MediaService } from '../../media/services';
 import { JwtPayload } from '../../auth/strategies/jwt.interface';
+import { FilterQuery, Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import User, { IUser } from '../models/user.model';
+import { SessionThrough } from '../models/session.model';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
-    private sessionService: UserSessionService,
+    @InjectModel(User.name)
+    private userModel: Model<IUser>,
+    private sessionService: SessionService,
     private jwtService: JwtService,
     private mediaService: MediaService,
   ) {}
 
   async create(userCreateDto: UserCreateDto) {
-    const user = User.create(instanceToPlain(userCreateDto));
-    return this.userRepository.save(user);
+    const user = new this.userModel(userCreateDto);
+    return user.save();
   }
 
   async update(
@@ -34,19 +35,19 @@ export class UserService {
     };
 
     if (avatar) {
-      updateData.avatar_id = (await this.mediaService.update(avatar)).id;
+      updateData.avatar_id = (await this.mediaService.update(avatar))._id;
     }
 
-    await this.userRepository.update(jwtPayload.id, updateData);
+    await this.userModel.updateOne(jwtPayload.id, updateData);
   }
 
   async createJwtToken(
-    user: User,
+    user: IUser,
     through: SessionThrough = SessionThrough.EMAIL,
   ) {
     const session = await this.sessionService.create(user, through);
     return this.jwtService.sign({
-      id: user.id,
+      id: user._id,
       is_active: user.is_active,
       email_verified_at: user.email_verified_at,
       session_token: session.token,
@@ -55,16 +56,16 @@ export class UserService {
     });
   }
 
-  async login(user: User, through: SessionThrough = SessionThrough.EMAIL) {
+  async login(user: IUser, through: SessionThrough = SessionThrough.EMAIL) {
     return this.createJwtToken(user, through);
   }
 
-  async findOne(findOptions: FindOneOptions<User>) {
-    return this.userRepository.findOne(findOptions);
+  async findOne(findOptions: FilterQuery<IUser>) {
+    return this.userModel.findOne(findOptions);
   }
 
   async me(payload: JwtPayload) {
-    return this.userRepository.findOneBy({
+    return this.userModel.findOne({
       id: payload.id,
     });
   }

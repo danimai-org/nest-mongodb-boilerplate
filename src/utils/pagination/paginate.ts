@@ -1,8 +1,8 @@
-import { SelectQueryBuilder } from 'typeorm';
+import { FilterQuery } from 'mongoose';
 import { PaginationQuery } from './pagination.dto';
 
 export const paginate = <T>(
-  query: SelectQueryBuilder<T>,
+  query: FilterQuery<T>,
   paginationQuery: PaginationQuery,
 ) => {
   const { page, limit } = paginationQuery;

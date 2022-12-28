@@ -1,17 +1,27 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { MulterModule } from '@nestjs/platform-express';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 import { MediaModule } from '../media/media.module';
-import { MulterConfigService } from '../media/multer_config.service';
 import { UserController } from './controllers';
-import { Token, User, UserSession } from './entities';
-import { UserService, TokenService, UserSessionService } from './services';
+import { UserService, TokenService, SessionService } from './services';
+import User, { UserSchema } from './models/user.model';
+import Session, { SessionSchema } from './models/session.model';
+import Token, { TokenSchema } from './models/token.model';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, UserSession, Token]),
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      {
+        name: Session.name,
+        schema: SessionSchema,
+      },
+      {
+        name: Token.name,
+        schema: TokenSchema,
+      },
+    ]),
     MediaModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -22,8 +32,8 @@ import { UserService, TokenService, UserSessionService } from './services';
       }),
     }),
   ],
-  providers: [UserService, TokenService, UserSessionService],
+  providers: [UserService, TokenService, SessionService],
   controllers: [UserController],
-  exports: [UserService, TokenService, UserSessionService],
+  exports: [UserService, TokenService, SessionService],
 })
 export class UserModule {}

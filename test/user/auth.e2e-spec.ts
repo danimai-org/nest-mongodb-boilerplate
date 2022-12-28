@@ -6,7 +6,7 @@ import {
   Token,
   UserSession,
   User,
-} from '../../src/modules/user/entities';
+} from '../../src/modules/user/models';
 import { faker } from '@faker-js/faker';
 import dataSource from '../../ormconfig.test';
 import { INestApplication } from '@nestjs/common';

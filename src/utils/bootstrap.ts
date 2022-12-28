@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { HttpExceptionFilter } from '../filters/http-exception.filter';
 import { SerializerInterceptor } from './serializer.interceptor';
 import validationOptions from './validation-options';
 
@@ -30,6 +31,7 @@ export const createApplication = (app: INestApplication) => {
   });
   app.useGlobalInterceptors(new SerializerInterceptor());
   app.useGlobalPipes(new ValidationPipe(validationOptions));
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   return app;
 };

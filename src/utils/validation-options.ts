@@ -12,7 +12,7 @@ const validationOptions: ValidationPipeOptions = {
   exceptionFactory: (errors: ValidationError[]) =>
     new HttpException(
       {
-        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
         errors: errors.reduce(
           (accumulator, currentValue) => ({
             ...accumulator,
@@ -22,6 +22,7 @@ const validationOptions: ValidationPipeOptions = {
           }),
           {},
         ),
+        message: 'Invalid Data.',
       },
       HttpStatus.UNPROCESSABLE_ENTITY,
     ),

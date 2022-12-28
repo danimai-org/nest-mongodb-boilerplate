@@ -1,102 +1,51 @@
-import { S3 } from '@aws-sdk/client-s3';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Media, StorageType } from '../entities';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import Media, { IMedia } from '../models/media.model';
+import { Response } from 'express';
+import { Model } from 'mongoose';
+import { IMediaService, S3File } from '../media.interface';
+import { S3MediaService } from './s3.service';
+import { LocalMediaService } from './local.service';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class MediaService {
-  client: S3;
-  storageType: StorageType;
+  service: IMediaService<Express.Multer.File | S3File>;
 
   constructor(
-    @InjectRepository(Media)
-    private mediaRepository: Repository<Media>,
-    private configService: ConfigService,
+    @InjectModel(Media.name)
+    private mediaModel: Model<IMedia>,
+    configService: ConfigService,
+    s3Service: S3MediaService,
+    localService: LocalMediaService,
   ) {
-    if (this.configService.get('storage.type') === 'S3') {
-      this.client = new S3({
-        region: this.configService.get('s3.region'),
-        credentials: {
-          accessKeyId: this.configService.get('s3.accessKeyId'),
-          secretAccessKey: this.configService.get('s3.secretAccessKey'),
-        },
-      });
-    }
-    this.storageType = this.configService.get('storage.type');
-  }
-
-  async create(file: unknown): Promise<Media> {
-    if (this.storageType === StorageType.LOCAL) {
-      const new_file = file as Express.Multer.File;
-
-      return this.mediaRepository
-        .create({
-          filename: new_file.filename,
-          url: `/${new_file.destination}/${new_file.filename}`,
-          mimetype: new_file.mimetype,
-          size: new_file.size,
-          storage_type: this.storageType,
-        })
-        .save();
-    } else if (this.storageType === StorageType.S3) {
-      const new_file = file as any;
-
-      return this.mediaRepository
-        .create({
-          filename: new_file.key,
-          url: new_file.location,
-          mimetype: new_file.contentType,
-          size: new_file.size,
-          storage_type: this.storageType,
-        })
-        .save();
+    if (configService.get('storage.type') === 's3') {
+      this.service = s3Service;
+    } else {
+      this.service = localService;
     }
   }
 
-  async update(file: Express.Multer.File, id?: string) {
+  async create(file: S3File | Express.Multer.File) {
+    return this.service.create(file);
+  }
+
+  async update(file: S3File | Express.Multer.File, id?: string) {
+    let media: IMedia;
     if (id) {
-      const media = await this.mediaRepository.findOneBy({ id });
-      if (this.storageType === StorageType.S3) {
-        await this.deleteS3(media);
-      } else if (this.storageType === StorageType.LOCAL) {
-        await this.deleteLocal(media);
-      }
+      media = await this.mediaModel.findById(id);
     }
-    return this.create(file);
+    return this.service.update(file, media);
   }
 
-  async deleteS3(media: Media) {
-    try {
-      await this.client.deleteObject({
-        Bucket: this.configService.get('s3.bucket'),
-        Key: media.filename,
-      });
-      await this.deleteMedia(media.id);
-    } catch (e) {
-      throw new HttpException(
-        'Unable to delete the media',
-        HttpStatus.SERVICE_UNAVAILABLE,
-      );
+  async delete(id: string) {
+    const media = await this.mediaModel.findById(id);
+    if (media) {
+      await this.service.delete(media);
     }
   }
 
-  async deleteMedia(id: string) {
-    await this.mediaRepository.delete(id);
-  }
-
-  async deleteLocal(media: Media) {
-    try {
-      fs.unlinkSync(path.join(process.cwd(), media.url.replace('/v1', '')));
-      await this.mediaRepository.delete(media.id);
-    } catch (e) {
-      // throw new HttpException(
-      //   'Unable to delete the media',
-      //   HttpStatus.SERVICE_UNAVAILABLE,
-      // );
-    }
+  async get(media: IMedia, res: Response) {
+    await this.service.get(media, res);
   }
 }

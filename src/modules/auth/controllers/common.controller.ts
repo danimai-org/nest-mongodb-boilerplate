@@ -15,7 +15,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { UserSessionService } from '../../user/services';
+import { SessionService } from '../../user/services';
 import { UserParam } from '../decorators';
 import { ResetPasswordRequestDto } from '../dto/common.request.dto';
 import { CommonService } from '../services';
@@ -29,7 +29,7 @@ import { JwtPayload } from '../strategies/jwt.interface';
 export class CommonController {
   constructor(
     private commonService: CommonService,
-    private sessionService: UserSessionService,
+    private sessionService: SessionService,
   ) {}
 
   @Post('/reset-password')

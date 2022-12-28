@@ -72,7 +72,7 @@ export class EmailService {
         HttpStatus.FORBIDDEN,
       );
     }
-    if (!user.comparePassword(loginDto.password)) {
+    if (!user.checkPassword(loginDto.password)) {
       throw new HttpException(
         { password: 'Password is incorrect' },
         HttpStatus.FORBIDDEN,

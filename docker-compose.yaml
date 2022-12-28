@@ -12,25 +12,22 @@ services:
     networks:
       - danimai_network
     depends_on:
-      - postgres
+      - mongo
     command: npm run start:dev
 
-  postgres:
-    container_name: ${APP_SLUG}_postgres
-    build:
-      context: .
-      dockerfile: Dockerfile.postgres
+  mongo:
+    container_name: ${APP_SLUG}_mongo
+    image: mongo:latest
     networks:
       - danimai_network
     ports:
-      - ${DATABASE_PORT}:5432
+      - ${DATABASE_PORT}:27017
     restart: always
     volumes:
-      - ./data/db:/var/lib/postgresql/data
+      - ./data/db:/data/db
     environment:
-      POSTGRES_USER: ${DATABASE_USERNAME}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_MULTIPLE_DATABASES: ${DATABASE_NAME},${TEST_DATABASE_NAME}
+      MONGO_INITDB_ROOT_USERNAME: ${DATABASE_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DATABASE_PASSWORD}
 
 networks:
   danimai_network:

@@ -1,19 +1,26 @@
 import { MailerModule } from '@nestjs-modules/mailer';
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../auth/auth.module';
 import { JwtStrategy } from '../auth/strategies/jwt.strategy';
-import { TypeOrmConfigService } from '../database/typeorm-config.service';
 import { MailModule } from '../mail/mail.module';
 import { MailerConfigClass } from '../mail/services/mailer_config.service';
 import { MediaModule } from '../media/media.module';
 import { UserModule } from '../user/user.module';
 import Configs from './config.util';
+import User from '../user/models/user.model';
 
 const modules = [MailModule, AuthModule, MediaModule, UserModule];
 export const global_modules = [
+  MongooseModule.forRootAsync({
+    useFactory(configService: ConfigService) {
+      console.log(User.name);
+      return { uri: configService.get('database.uri') };
+    },
+    inject: [ConfigService],
+  }),
   ConfigModule.forRoot({
     load: [...Configs],
     isGlobal: true,
@@ -28,13 +35,7 @@ export const global_modules = [
 export const providers = [JwtStrategy];
 
 @Module({
-  imports: [
-    TypeOrmModule.forRootAsync({
-      useClass: TypeOrmConfigService,
-    }),
-    ...global_modules,
-    ...modules,
-  ],
+  imports: [...global_modules, ...modules],
   providers,
 })
 export class AppModule {}

@@ -1,19 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 import { IsPassword } from '../../../utils/validator';
-import { IsNotExist } from '../../../utils/validator/is_not_exists.validator';
-import { User } from '../../user/entities';
 
 export class RegisterRequestDto {
   @ApiProperty({ example: 'example@danimai.com' })
   @IsEmail()
-  @IsNotExist({ repository: User, pathToProperty: 'email' })
   email: string;
 
   @ApiProperty({ example: 'Password@123' })
   @IsString()
   @IsPassword()
-  password: string;
+  password?: string;
 
   @ApiProperty({ example: 'Danimai' })
   @IsString()

@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { MailModule } from '../mail/mail.module';
-import { User } from '../user/entities';
+import User, { UserSchema } from '../user/models/user.model';
 import { UserModule } from '../user/user.module';
 import {
   CommonController,
@@ -10,9 +9,10 @@ import {
 } from './controllers';
 import { CommonService, GoogleAuthenticationService } from './services';
 import { EmailService } from './services/email.service';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
-  imports: [MailModule, UserModule, TypeOrmModule.forFeature([User])],
+  imports: [MailModule, UserModule],
   providers: [EmailService, CommonService, GoogleAuthenticationService],
   controllers: [
     EmailController,

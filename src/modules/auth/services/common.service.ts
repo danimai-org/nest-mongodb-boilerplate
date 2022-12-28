@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { UserSession } from '../../user/entities';
 import { TokenService } from '../../user/services';
 import { ResetPasswordRequestDto } from '../dto/common.request.dto';
+import { ISession } from '../../user/models/session.model';
 
 @Injectable()
 export class CommonService {
@@ -23,7 +23,7 @@ export class CommonService {
     }
   }
 
-  async logout(session: UserSession) {
+  async logout(session: ISession) {
     session.logged_out_at = new Date();
     await session.save();
   }
