@@ -10,13 +10,12 @@ import { MailerConfigClass } from '../mail/services/mailer_config.service';
 import { MediaModule } from '../media/media.module';
 import { UserModule } from '../user/user.module';
 import Configs from './config.util';
-import User from '../user/models/user.model';
 
 const modules = [MailModule, AuthModule, MediaModule, UserModule];
+
 export const global_modules = [
   MongooseModule.forRootAsync({
-    useFactory(configService: ConfigService) {
-      console.log(User.name);
+    useFactory: async (configService: ConfigService) => {
       return { uri: configService.get('database.uri') };
     },
     inject: [ConfigService],

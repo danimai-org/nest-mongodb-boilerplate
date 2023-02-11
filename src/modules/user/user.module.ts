@@ -5,21 +5,41 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { MediaModule } from '../media/media.module';
 import { UserController } from './controllers';
 import { UserService, TokenService, SessionService } from './services';
-import User, { UserSchema } from './models/user.model';
-import Session, { SessionSchema } from './models/session.model';
-import Token, { TokenSchema } from './models/token.model';
+import User, { UserSchema } from '../../models/user.model';
+import Session, { SessionSchema } from '../../models/session.model';
+import Token, { TokenSchema } from '../../models/token.model';
+import * as bcrypt from 'bcryptjs';
+import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: User.name, schema: UserSchema },
+    MongooseModule.forFeatureAsync([
+      {
+        name: User.name,
+        useFactory: () => {
+          const schema = UserSchema;
+          schema.pre('save', function (next) {
+            if (!this.isModified('password')) next();
+            this.password = bcrypt.hashSync(this.password);
+            next();
+          });
+          return schema;
+        },
+      },
       {
         name: Session.name,
-        schema: SessionSchema,
+        useFactory: () => SessionSchema,
       },
       {
         name: Token.name,
-        schema: TokenSchema,
+        useFactory: () => {
+          const schema = TokenSchema;
+
+          schema.pre('save', function () {
+            this.token = `${randomStringGenerator()}-${randomStringGenerator()}`;
+          });
+          return schema;
+        },
       },
     ]),
     MediaModule,

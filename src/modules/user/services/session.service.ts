@@ -4,18 +4,21 @@ import * as crypto from 'crypto';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import Session, { ISession, SessionThrough } from '../models/session.model';
-import { IUser } from '../models/user.model';
+import Session, {
+  SessionDocument,
+  SessionThrough,
+} from '../../../models/session.model';
+import { UserDocument } from '../../../models/user.model';
 
 @Injectable()
 export class SessionService {
   constructor(
     @InjectModel(Session.name)
-    private sessionModel: Model<ISession>,
+    private sessionModel: Model<SessionDocument>,
     private configService: ConfigService,
   ) {}
 
-  create(user: IUser, through: SessionThrough = SessionThrough.EMAIL) {
+  create(user: UserDocument, through: SessionThrough = SessionThrough.EMAIL) {
     const token = crypto
       .createHash('sha256')
       .update(randomStringGenerator())

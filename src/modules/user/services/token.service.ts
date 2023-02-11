@@ -1,20 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import Token, { IToken, TokenType } from '../models/token.model';
-import User, { IUser } from '../models/user.model';
+import Token, { TokenDocument, TokenType } from '../../../models/token.model';
+import User, { UserDocument } from '../../../models/user.model';
 
 @Injectable()
 export class TokenService {
   constructor(
     @InjectModel(Token.name)
-    private tokenModel: Model<IToken>,
+    private tokenModel: Model<TokenDocument>,
     @InjectModel(User.name)
-    private userModel: Model<IUser>,
+    private userModel: Model<UserDocument>,
   ) {}
 
   async create(
-    user: IUser,
+    user: UserDocument,
     type: keyof typeof TokenType = 'REGISTER_VERIFY',
     expires_at: Date = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
   ) {

@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { IMedia } from './models/media.model';
+import { MediaDocument } from '../../models/media.model';
 
 export interface S3File extends Express.Multer.File {
   bucket: string;
@@ -15,8 +15,8 @@ export interface S3File extends Express.Multer.File {
 }
 
 export interface IMediaService<T> {
-  create: (file: T) => Promise<IMedia>;
-  update: (file: T, media?: IMedia) => Promise<IMedia>;
-  delete: (media: IMedia) => Promise<void>;
-  get: (media: IMedia, res: Response) => Promise<void>;
+  create: (file: T) => Promise<MediaDocument>;
+  update: (file: T, media?: MediaDocument) => Promise<MediaDocument>;
+  delete: (media: MediaDocument) => Promise<void>;
+  get: (media: MediaDocument, res: Response) => Promise<void>;
 }

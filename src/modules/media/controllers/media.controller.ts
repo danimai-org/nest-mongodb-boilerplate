@@ -15,7 +15,7 @@ import { MediaService } from '../services';
 import { CreateMediaRequestDto } from '../dto/media.request.dto';
 import { ParseUUIDPipe } from '@nestjs/common/pipes';
 import { ParseObjectIdPipe } from '../../../pipes/object-id.pipe';
-import Media, { IMedia } from '../models/media.model';
+import Media, { MediaDocument } from '../../../models/media.model';
 
 @ApiTags('Media')
 @Controller({
@@ -28,7 +28,7 @@ export class MediaController {
   @Get(':id')
   async getOne(
     @Res() res: Response,
-    @Param('id', new ParseObjectIdPipe(Media)) media: IMedia,
+    @Param('id', new ParseObjectIdPipe(Media)) media: MediaDocument,
   ) {
     await this.mediaService.get(media, res);
   }

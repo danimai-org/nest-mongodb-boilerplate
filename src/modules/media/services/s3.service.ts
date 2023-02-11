@@ -5,7 +5,7 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import Media, { IMedia } from '../models/media.model';
+import Media, { MediaDocument } from '../../../models/media.model';
 import { Model } from 'mongoose';
 import { IMediaService, S3File } from '../media.interface';
 import { Response } from 'express';
@@ -18,7 +18,7 @@ export class S3MediaService implements IMediaService<S3File> {
 
   constructor(
     @InjectModel(Media.name)
-    private mediaModel: Model<IMedia>,
+    private mediaModel: Model<MediaDocument>,
     private configService: ConfigService,
   ) {
     this.storageType = configService.get('storage.type');
@@ -44,26 +44,26 @@ export class S3MediaService implements IMediaService<S3File> {
     return this.createS3(file);
   }
 
-  async update(file: S3File, media?: IMedia) {
+  async update(file: S3File, media?: MediaDocument) {
     if (media) {
       await this.delete(media);
     }
     return this.create(file);
   }
 
-  async delete(media: IMedia) {
+  async delete(media: MediaDocument) {
     try {
       await this.client.deleteObject({
         Bucket: this.configService.get('s3.bucket'),
         Key: media.filename,
       });
-      await this.deleteMedia(media._id);
+      await this.deleteMedia(media.id);
     } catch (e) {
       console.log(e);
     }
   }
 
-  async get(media: IMedia, res: Response) {
+  async get(media: MediaDocument, res: Response) {
     try {
       res.setHeader('content-type', media.mimetype);
       const s3Res = await this.client.getObject({

@@ -4,7 +4,7 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import Media, { IMedia } from '../models/media.model';
+import Media, { MediaDocument } from '../../../models/media.model';
 import { Model } from 'mongoose';
 import { IMediaService } from '../media.interface';
 import * as fs from 'node:fs';
@@ -18,7 +18,7 @@ import { InjectModel } from '@nestjs/mongoose';
 export class LocalMediaService implements IMediaService<Express.Multer.File> {
   constructor(
     @InjectModel(Media.name)
-    private mediaModel: Model<IMedia>,
+    private mediaModel: Model<MediaDocument>,
   ) {}
 
   async create(file: Express.Multer.File) {
@@ -31,7 +31,7 @@ export class LocalMediaService implements IMediaService<Express.Multer.File> {
     return this.createMedia(file);
   }
 
-  async update(file: Express.Multer.File, media?: IMedia) {
+  async update(file: Express.Multer.File, media?: MediaDocument) {
     if (media) {
       await this.delete(media);
     }
@@ -47,16 +47,16 @@ export class LocalMediaService implements IMediaService<Express.Multer.File> {
     });
   }
 
-  async delete(media: IMedia) {
+  async delete(media: MediaDocument) {
     try {
       fs.unlinkSync(path.join(process.cwd(), media.url.replace('/v1', '')));
-      await this.deleteMedia(media._id);
+      await this.deleteMedia(media.id);
     } catch (e) {
       console.log(e);
     }
   }
 
-  async get(media: IMedia, res: Response) {
+  async get(media: MediaDocument, res: Response) {
     const file_path = join(process.cwd(), media.url);
 
     if (!existsSync(file_path)) {

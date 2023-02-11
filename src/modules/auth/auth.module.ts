@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { MailModule } from '../mail/mail.module';
-import User, { UserSchema } from '../user/models/user.model';
 import { UserModule } from '../user/user.module';
 import {
   CommonController,

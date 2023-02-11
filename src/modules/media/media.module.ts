@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MediaController } from './controllers';
-import Media, { MediaSchema } from './models/media.model';
+import Media, { MediaSchema } from '../../models/media.model';
 import { LocalMediaService, MediaService, S3MediaService } from './services';
 import { MongooseModule } from '@nestjs/mongoose';
 

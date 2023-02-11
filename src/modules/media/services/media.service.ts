@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import Media, { IMedia } from '../models/media.model';
+import Media, { MediaDocument } from '../../../models/media.model';
 import { Response } from 'express';
 import { Model } from 'mongoose';
 import { IMediaService, S3File } from '../media.interface';
@@ -14,7 +14,7 @@ export class MediaService {
 
   constructor(
     @InjectModel(Media.name)
-    private mediaModel: Model<IMedia>,
+    private mediaModel: Model<MediaDocument>,
     configService: ConfigService,
     s3Service: S3MediaService,
     localService: LocalMediaService,
@@ -31,7 +31,7 @@ export class MediaService {
   }
 
   async update(file: S3File | Express.Multer.File, id?: string) {
-    let media: IMedia;
+    let media: MediaDocument;
     if (id) {
       media = await this.mediaModel.findById(id);
     }
@@ -45,7 +45,7 @@ export class MediaService {
     }
   }
 
-  async get(media: IMedia, res: Response) {
+  async get(media: MediaDocument, res: Response) {
     await this.service.get(media, res);
   }
 }

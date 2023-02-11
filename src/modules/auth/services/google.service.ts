@@ -2,10 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { google, Auth } from 'googleapis';
 import { UserService } from '../../user/services';
-import { Model } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
-import User, { IUser } from '../../user/models/user.model';
-import { SessionThrough } from '../../user/models/session.model';
+import { UserDocument } from '../../../models/user.model';
+import { SessionThrough } from '../../../models/session.model';
 
 @Injectable()
 export class GoogleAuthenticationService {
@@ -60,7 +58,7 @@ export class GoogleAuthenticationService {
     return userInfoResponse.data;
   }
 
-  async handleRegisteredUser(user: IUser) {
+  async handleRegisteredUser(user: UserDocument) {
     const jwtToken = await this.userService.login(user, SessionThrough.GOOGLE);
     return { auth_token: jwtToken };
   }

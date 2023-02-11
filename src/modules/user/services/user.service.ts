@@ -7,14 +7,14 @@ import { MediaService } from '../../media/services';
 import { JwtPayload } from '../../auth/strategies/jwt.interface';
 import { FilterQuery, Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import User, { IUser } from '../models/user.model';
-import { SessionThrough } from '../models/session.model';
+import User, { UserDocument } from '../../../models/user.model';
+import { SessionThrough } from '../../../models/session.model';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name)
-    private userModel: Model<IUser>,
+    private userModel: Model<UserDocument>,
     private sessionService: SessionService,
     private jwtService: JwtService,
     private mediaService: MediaService,
@@ -35,14 +35,14 @@ export class UserService {
     };
 
     if (avatar) {
-      updateData.avatar_id = (await this.mediaService.update(avatar))._id;
+      updateData.avatar_id = (await this.mediaService.update(avatar)).id;
     }
 
     await this.userModel.updateOne(jwtPayload.id, updateData);
   }
 
   async createJwtToken(
-    user: IUser,
+    user: UserDocument,
     through: SessionThrough = SessionThrough.EMAIL,
   ) {
     const session = await this.sessionService.create(user, through);
@@ -56,11 +56,14 @@ export class UserService {
     });
   }
 
-  async login(user: IUser, through: SessionThrough = SessionThrough.EMAIL) {
+  async login(
+    user: UserDocument,
+    through: SessionThrough = SessionThrough.EMAIL,
+  ) {
     return this.createJwtToken(user, through);
   }
 
-  async findOne(findOptions: FilterQuery<IUser>) {
+  async findOne(findOptions: FilterQuery<UserDocument>) {
     return this.userModel.findOne(findOptions);
   }
 

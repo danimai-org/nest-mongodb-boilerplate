@@ -1,7 +1,7 @@
-import { IUser } from '../../user/models/user.model';
+import { UserDocument } from '../../../models/user.model';
 
 export type JwtPayload = Pick<
-  IUser,
+  UserDocument,
   'id' | 'role' | 'is_active' | 'email_verified_at'
 > & {
   iat: number;
