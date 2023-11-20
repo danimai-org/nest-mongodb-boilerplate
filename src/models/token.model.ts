@@ -15,7 +15,7 @@ export default class Token {
   @Prop()
   token: string;
 
-  @Prop()
+  @Prop({ default: false })
   is_used: boolean;
 
   @Prop({ type: String, enum: TokenType, default: TokenType.REGISTER_VERIFY })

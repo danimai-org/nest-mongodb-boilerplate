@@ -1,3 +1,4 @@
+// import { Injectable } from '@nestjs/common';
 // import {
 //   isUUID,
 //   registerDecorator,
@@ -6,19 +7,22 @@
 //   ValidatorConstraintInterface,
 // } from 'class-validator';
 // import { ValidationArguments } from 'class-validator/types/validation/ValidationArguments';
-// import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
-// import dataSource from '../../../ormconfig';
+// import { Model, Types } from 'mongoose';
 
 // @ValidatorConstraint({ name: 'IsExist', async: true })
-// export class IsExistContraint implements ValidatorConstraintInterface {
+// @Injectable()
+// export class IsExistConstraint implements ValidatorConstraintInterface {
 //   async validate(value: string, validationArguments: ValidationArguments) {
-//     const repository = validationArguments
-//       .constraints[0] as EntityClassOrSchema;
+//     const repository = validationArguments.constraints[0] as Model<any>;
 //     const pathToProperty = validationArguments.constraints[1];
 
 //     // Check for uuid
-//     const is_uuid = validationArguments.constraints[2];
-//     if (is_uuid && !isUUID(value, '4')) {
+//     const checkUUID = validationArguments.constraints[2];
+//     const checkObjectID = validationArguments.constraints[3];
+//     if (checkUUID && !isUUID(value, '4')) {
+//       return false;
+//     }
+//     if (checkObjectID && !Types.ObjectId.isValid(value)) {
 //       return false;
 //     }
 
@@ -31,11 +35,17 @@
 //   }
 // }
 
-// export function IsExist(
-//   property: {
-//     repository: EntityClassOrSchema;
-//     pathToProperty?: string;
+// export function IsExist<T>(
+//   {
+//     repository,
+//     filterField = '_id',
+//     uuid,
+//     objectID,
+//   }: {
+//     repository: Model<T>;
+//     filterField?: string;
 //     uuid?: boolean;
+//     objectID?: boolean;
 //   },
 //   validationOptions: ValidationOptions = {},
 // ) {
@@ -44,16 +54,12 @@
 //       name: 'IsExist',
 //       target: object.constructor,
 //       propertyName: propertyName,
-//       constraints: [
-//         property.repository,
-//         property.pathToProperty,
-//         property.uuid,
-//       ],
+//       constraints: [repository, filterField, objectID, uuid],
 //       options: {
 //         message: `${propertyName} does not exists`,
 //         ...validationOptions,
 //       },
-//       validator: IsExistContraint,
+//       validator: IsExistConstraint,
 //     });
 //   };
 // }

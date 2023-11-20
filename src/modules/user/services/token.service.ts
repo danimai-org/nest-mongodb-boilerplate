@@ -19,7 +19,7 @@ export class TokenService {
     expires_at: Date = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
   ) {
     return this.tokenModel.create({
-      user_id: user.id,
+      user: user.id,
       type: TokenType[type],
       expires_at,
     });
@@ -31,6 +31,7 @@ export class TokenService {
       type: TokenType[type],
       is_used: false,
     });
+
     if (!tokenEntity) {
       throw new Error('Token not found');
     }

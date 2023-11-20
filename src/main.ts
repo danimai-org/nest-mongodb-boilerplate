@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './modules/app/app.module';
 import { createApplication, documentationBuilder } from './utils/bootstrap';
 import * as morgan from 'morgan';
+import { RolesGuard } from './modules/auth/guards/roles.guard';
 
 async function bootstrap() {
   let app = await NestFactory.create(AppModule);

@@ -1,21 +1,25 @@
 import * as bcrypt from 'bcryptjs';
 import { RoleType } from '../constants/role-type';
-import mongoose, { HydratedDocument, model, models } from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Exclude } from 'class-transformer';
 import Media from './media.model';
+import { ApiProperty } from '@nestjs/swagger';
 
 export type UserDocument = HydratedDocument<User>;
 
 @Schema()
 export default class User {
   @Prop()
+  @ApiProperty()
   first_name: string;
 
   @Prop()
+  @ApiProperty()
   last_name: string;
 
   @Prop()
+  @ApiProperty()
   email: string;
 
   @Prop()
@@ -23,15 +27,19 @@ export default class User {
   password: string;
 
   @Prop()
+  @ApiProperty()
   is_active: boolean;
 
   @Prop()
+  @ApiProperty()
   role: RoleType;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Media' })
+  @ApiProperty()
   avatar?: Media;
 
   @Prop()
+  @ApiProperty({ format: 'datetime' })
   email_verified_at: Date;
 
   full_name: string;

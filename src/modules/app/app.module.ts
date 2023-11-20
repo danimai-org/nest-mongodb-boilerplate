@@ -10,8 +10,9 @@ import { MailerConfigClass } from '../mail/services/mailer_config.service';
 import { MediaModule } from '../media/media.module';
 import { UserModule } from '../user/user.module';
 import Configs from './config.util';
+import { PostModule } from '../posts/post.module';
 
-const modules = [MailModule, AuthModule, MediaModule, UserModule];
+const modules = [MailModule, AuthModule, MediaModule, UserModule, PostModule];
 
 export const global_modules = [
   MongooseModule.forRootAsync({
@@ -31,10 +32,7 @@ export const global_modules = [
   PassportModule,
 ];
 
-export const providers = [JwtStrategy];
-
 @Module({
   imports: [...global_modules, ...modules],
-  providers,
 })
 export class AppModule {}

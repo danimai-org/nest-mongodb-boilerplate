@@ -43,7 +43,7 @@ export class UserController {
     summary: 'Get logged in user',
   })
   async me(@UserParam() payload: JwtPayload) {
-    return this.userService.me(payload);
+    return [];
   }
 
   @Patch('/me')
